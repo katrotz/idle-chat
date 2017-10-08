@@ -1,0 +1,30 @@
+.app {
+  text-align: center;
+  height: 100%;
+}
+
+.app-logo {
+
+  height: 60px;
+  cursor: pointer;
+}
+
+.app-header {
+  background-color: #222;
+  color: white;
+}
+
+.app-footer {
+  text-align: left;
+  color: #777;
+}
+
+.app-title {
+  font-size: 1.5em;
+}
+
+.app-content {
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
