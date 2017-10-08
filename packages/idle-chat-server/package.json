@@ -1,0 +1,36 @@
+{
+  "name": "idle-chat-server",
+  "description": "Provides a graphQL endpoint for the IdleChat application",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/katrotz/idle-chat.git"
+  },
+  "keywords": [
+    "chat",
+    "react",
+    "relay"
+  ],
+  "author": "Vyacheslav Cotruta <katrotz@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/katrotz/idle-chat/issues"
+  },
+  "homepage": "https://github.com/katrotz/idle-chat#readme",
+  "dependencies": {
+    "compression": "^1.7.0",
+    "express": "^4.15.3",
+    "express-graphql": "^0.6.11",
+    "graphql": "^0.11.7",
+    "lodash": "^4.17.4",
+    "minimist": "^1.2.0",
+    "winston": "^2.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
