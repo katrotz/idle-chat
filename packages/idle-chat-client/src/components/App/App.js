@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Layout, Row, Col } from 'antd';
 
+import Sessions from './../Sessions/Sessions';
 import Chat from './../Chat/Chat';
 import logo from './logo.png';
 import './App.css';
@@ -8,7 +9,17 @@ import './App.css';
 const { Header, Content, Footer } = Layout;
 
 class App extends Component {
+  static defaultProps = {
+    userId: null,
+    sessions: [],
+    createSession: () => {}
+  };
+
   render() {
+    const userId = this.props.userId;
+    const sessions = this.props.sessions;
+    const activeSession = sessions.length ? sessions[0] : null;
+
     return (
       <Layout className="app">
         <Header className="app-header">
@@ -21,7 +32,10 @@ class App extends Component {
 
         <Layout>
           <Content className="app-content">
-            <Chat></Chat>
+            <Sessions sessions={ this.props.sessions } createSession={ this.props.createSession }></Sessions>
+            { activeSession &&
+              <Chat session={ activeSession }></Chat>
+            }
           </Content>
         </Layout>
 

@@ -12,6 +12,16 @@ const types = [ Message ];
 const query = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
+    fetchUserSessions: {
+      type: new GraphQLList(Session),
+      description: 'Fetches all chat sessions initiated by a user',
+      args: {
+        userId: {
+          type: GraphQLID
+        }
+      },
+      resolve: (root, { userId }) => db.fetchUserSessions(userId)
+    },
     fetchSession: {
       type: Session,
       description: 'Fetches a chat session',

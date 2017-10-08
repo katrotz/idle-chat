@@ -15,6 +15,8 @@ const rootValue = {
   }
 };
 
+router.use('/schema', require('./schema'));
+
 router.use('/', graphqlHTTP({ schema, rootValue, graphiql, pretty }));
 
 module.exports = router;

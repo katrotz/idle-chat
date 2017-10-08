@@ -23,6 +23,7 @@
   "homepage": "https://github.com/katrotz/idle-chat#readme",
   "dependencies": {
     "compression": "^1.7.0",
+    "cors": "^2.8.4",
     "express": "^4.15.3",
     "express-graphql": "^0.6.11",
     "graphql": "^0.11.7",

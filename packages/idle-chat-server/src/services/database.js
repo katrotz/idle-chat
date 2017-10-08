@@ -37,7 +37,7 @@ const initSession = (sessionId, userId) => {
 /**
  * Fetches a session by id
  * @param {string} sessionId The session id
- * @returns {Promise.<Object>} The updated session
+ * @returns {Promise.<Object>} The session
  */
 const fetchSession = (sessionId) => {
   const session = sessions.get(sessionId);
@@ -45,6 +45,23 @@ const fetchSession = (sessionId) => {
   if (!session) return Promise.reject(`Session "${ sessionId }" not found`);
 
   return Promise.resolve(session);
+};
+
+/**
+ * Fetches all the sessions initiated by the user
+ * @param {string} userId The user id
+ * @returns {Promise.<Object>} The updated session
+ */
+const fetchUserSessions = (userId) => {
+  const userSessions = [];
+
+  sessions.forEach((session) => {
+    if (session.userId === userId) {
+      userSessions.push(session);
+    }
+  });
+
+  return Promise.resolve(sessions);
 };
 
 /**
@@ -110,4 +127,4 @@ const deleteMessage = (sessionId, messageId) => {
     });
 };
 
-module.exports = { initSession, fetchSession, addMessage, editMessage, deleteMessage };
+module.exports = { initSession, fetchSession, fetchUserSessions, addMessage, editMessage, deleteMessage };
