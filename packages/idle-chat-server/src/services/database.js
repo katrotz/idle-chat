@@ -1,6 +1,52 @@
 const _ = require('lodash');
 
-const sessions = new Map();
+const storage = new Map();
+
+storage.set('users', {
+  mockedUser: {
+    id: 'mockedUser',
+    avatar: null,
+    name: 'John Doe',
+    session: {
+      id: `session_${Date.now()}`,
+      user: 'mockedUser',
+      messages: [
+        {
+          id: `message_${Date.now()}`,
+          user: 'mockedUser',
+          deleted: false,
+          created: Date.now(),
+          updated: null,
+          versions: [],
+          content: 'This message is to inform you that the user is mocked in the backend as currently there is ' +
+          'no facility to create a user and generate a chat session from the front-end. Happy chatting :)'
+        }
+      ]
+    }
+  }
+});
+
+const persistUser = (user) => {
+  const users = storage.get('users');
+
+  users[user.id] = user;
+
+  storage.set('users', users);
+
+  return Promise.resolve(user);
+};
+
+const fetchUser = (userId = 'mockedUser') => {
+  const users = storage.get('users');
+
+  return Promise.resolve(users[userId]);
+};
+
+const createUser = (id, name, avatar = null) => {
+  const user = { id, avatar, name, session: null };
+
+  return persistUser(user);
+};
 
 /**
  * Stores the session information
@@ -8,73 +54,42 @@ const sessions = new Map();
  * @returns {Promise.<Object>} The updated session
  */
 const persistSession = (session) => {
-  sessions.set(session.id, session);
+  return fetchUser(session.user)
+    .then(user => {
+      user.session = session;
 
-  return Promise.resolve(session);
+      return persistUser(user).then(() => session);
+    })
 };
 
 /**
  * Creates a new session
- * @param {string} sessionId The session id for the new session
- * @param {string} userId The user id
- * @returns {Promise.<Object>} The updated session
- * @throws Error
- * TODO Throw an error when the session already exists to avoid leaking the session to the wrong user
- */
-const initSession = (sessionId, userId) => {
-  return fetchSession(sessionId)
-    .catch(() => {
-      const session = {
-        id: sessionId,
-        user: userId,
-        messages: []
-      };
-
-      return persistSession(session);
-    });
-};
-
-/**
- * Fetches a session by id
- * @param {string} sessionId The session id
- * @returns {Promise.<Object>} The session
- */
-const fetchSession = (sessionId) => {
-  const session = sessions.get(sessionId);
-
-  if (!session) return Promise.reject(`Session "${ sessionId }" not found`);
-
-  return Promise.resolve(session);
-};
-
-/**
- * Fetches all the sessions initiated by the user
- * @param {string} userId The user id
+ * @param {string} userId The user id the session belongs to
  * @returns {Promise.<Object>} The updated session
  */
-const fetchUserSessions = (userId) => {
-  const userSessions = [];
+const initSession = (userId) => {
+  const session = {
+    id: `session_${Date.now()}`,
+    user: userId,
+    messages: []
+  };
 
-  sessions.forEach((session) => {
-    if (session.userId === userId) {
-      userSessions.push(session);
-    }
-  });
-
-  return Promise.resolve(sessions);
+  return persistSession(session);
 };
 
 /**
  * Adds a message to a session
- * @param {string} sessionId The session id
+ * @param {string} userId The user the session belongs to
  * @param {Object} message The message object
  * @returns {Promise.<Object>} The updated session
  */
-const addMessage = (sessionId, message) => {
-  return fetchSession(sessionId)
+const addMessage = (userId, message) => {
+  return fetchUser(userId)
+    .then(user => user.session || initSession(userId))
     .then(session => {
       message = Object.assign({
-        id: String(Date.now()),
+        id: `message_${Date.now()}`,
+        user: userId,
         deleted: false,
         created: Date.now(),
         updated: null,
@@ -89,13 +104,14 @@ const addMessage = (sessionId, message) => {
 
 /**
  * Alters an existing message
- * @param {string} sessionId The session id
+ * @param {string} userId The user id
  * @param {string} messageId The message id
  * @param {string} content The new message content
  * @returns {Promise.<Object>} The updated session
  */
-const editMessage = (sessionId, messageId, content) => {
-  return fetchSession(sessionId)
+const editMessage = (userId, messageId, content) => {
+  return fetchUser(userId)
+    .then(user => user.session)
     .then(session => {
       const message = _.find(session.messages, { id: String(messageId) });
 
@@ -112,12 +128,13 @@ const editMessage = (sessionId, messageId, content) => {
 
 /**
  * Soft deletes a message from a chat session
- * @param {string} sessionId The session id the message belongs to
+ * @param {string} userId The user id the chat session belongs to
  * @param {string} messageId The message id to remove
  * @returns {Promise.<Object>} The updated session
  */
-const deleteMessage = (sessionId, messageId) => {
-  return fetchSession(sessionId)
+const deleteMessage = (userId, messageId) => {
+  return fetchUser(userId)
+    .then(user => user.session)
     .then(session => {
       const message = _.find(session.messages, { id: messageId });
 
@@ -127,4 +144,4 @@ const deleteMessage = (sessionId, messageId) => {
     });
 };
 
-module.exports = { initSession, fetchSession, fetchUserSessions, addMessage, editMessage, deleteMessage };
+module.exports = { createUser, fetchUser, initSession, addMessage, editMessage, deleteMessage };

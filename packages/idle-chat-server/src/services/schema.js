@@ -12,25 +12,20 @@ const types = [ Message ];
 const query = new GraphQLObjectType({
   name: 'Query',
   fields: () => ({
-    fetchUserSessions: {
-      type: new GraphQLList(Session),
-      description: 'Fetches all chat sessions initiated by a user',
+    user: {
+      type: User,
+      description: 'The application user',
       args: {
         userId: {
           type: GraphQLID
         }
       },
-      resolve: (root, { userId }) => db.fetchUserSessions(userId)
+      resolve: (root, { userId }) => db.fetchUser(userId)
     },
-    fetchSession: {
-      type: Session,
-      description: 'Fetches a chat session',
-      args: {
-        sessionId: {
-          type: GraphQLID
-        }
-      },
-      resolve: (root, { sessionId }) => db.fetchSession(sessionId)
+    mockedUser: {
+      type: User,
+      description: 'The mocked user for demo purpose',
+      resolve: () => db.fetchUser()
     }
   })
 });
@@ -38,7 +33,24 @@ const query = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
   name: 'Mutation',
   fields: {
-    initSession: {
+    createUser: {
+      type: User,
+      description: 'Creates a new user',
+      args: {
+        name: {
+          type: GraphQLString,
+          description: 'The optional users name'
+        }
+      },
+      resolve: (root, args, context) => {
+        const ip = root.ip(args, context.res.req); // Uses the client IP to generate user id
+        const { name } = args;
+
+        return db.createUser(ip, name);
+      }
+    },
+
+    /*initSession: {
       type: Session,
       description: 'Initializes a new session',
       args: {
@@ -46,21 +58,15 @@ const mutation = new GraphQLObjectType({
           type: GraphQLID
         }
       },
-      resolve: (root, args, context) => {
-        const ip = root.ip(args, context.res.req);
-        const { userId } = args;
-
-        return db.initSession(ip, userId);
+      resolve: (root, { userId }, context) => {
+        return db.initSession(userId);
       }
-    },
+    },*/
 
     addMessage: {
       type: Session,
       description: 'Adds a new message to the session',
       args: {
-        sessionId: {
-          type: GraphQLID
-        },
         userId: {
           type: GraphQLID
         },
@@ -69,9 +75,9 @@ const mutation = new GraphQLObjectType({
         }
       },
       resolve: (root, args) => {
-        const { sessionId, userId, message } = args;
+        const { userId, message } = args;
 
-        return db.addMessage(sessionId, {
+        return db.addMessage(userId, {
           user: userId,
           content: message
         });
@@ -82,20 +88,20 @@ const mutation = new GraphQLObjectType({
       type: Session,
       description: 'Alters an existing message content',
       args: {
-        sessionId: {
+        userId: {
           type: GraphQLID
         },
         messageId: {
-          type: GraphQLString
+          type: GraphQLID
         },
         content: {
           type: GraphQLString
         }
       },
       resolve: (root, args) => {
-        const { sessionId, messageId, content } = args;
+        const { userId, messageId, content } = args;
 
-        return db.editMessage(sessionId, messageId, content);
+        return db.editMessage(userId, messageId, content);
       }
     },
 
@@ -103,17 +109,17 @@ const mutation = new GraphQLObjectType({
       type: Session,
       description: 'Deletes a message from a chat session',
       args: {
-        sessionId: {
+        userId: {
           type: GraphQLID
         },
         messageId: {
-          type: GraphQLString
+          type: GraphQLID
         }
       },
       resolve: (root, args) => {
-        const { sessionId, messageId } = args;
+        const { userId, messageId } = args;
 
-        return db.deleteMessage(sessionId, messageId);
+        return db.deleteMessage(userId, messageId);
       }
     }
   }

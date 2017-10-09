@@ -1,8 +1,10 @@
-const { GraphQLObjectType, GraphQLList, GraphQLID, GraphQLString } = require('graphql');
+const { GraphQLObjectType, GraphQLID, GraphQLString } = require('graphql');
+
+const { Session } = require('./session');
 
 const User = new GraphQLObjectType({
-  name: 'Session',
-  description: 'Describes a chat session',
+  name: 'User',
+  description: 'Describes an application user',
   fields: () => ({
     id: {
       type: GraphQLID,
@@ -15,6 +17,10 @@ const User = new GraphQLObjectType({
     name: {
       type: GraphQLString,
       description: 'The user name'
+    },
+    session: {
+      type: Session,
+      description: 'The users chat session'
     }
   })
 });
