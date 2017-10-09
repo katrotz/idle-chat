@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Layout, Row, Col } from 'antd';
+import { QueryRenderer, graphql } from 'react-relay';
 
-import Sessions from './../Sessions/Sessions';
+import { environment } from './../../relayEnvironment';
 import Chat from './../Chat/Chat';
 import logo from './logo.png';
 import './App.css';
@@ -9,17 +10,40 @@ import './App.css';
 const { Header, Content, Footer } = Layout;
 
 class App extends Component {
-  static defaultProps = {
-    userId: null,
-    sessions: [],
-    createSession: () => {}
-  };
-
   render() {
-    const userId = this.props.userId;
-    const sessions = this.props.sessions;
-    const activeSession = sessions.length ? sessions[0] : null;
+    const appQuery = graphql`
+      query AppQuery {
+        user: mockedUser {
+          ...Chat_user
+        }
+      }
+    `;
 
+    return (
+      <QueryRenderer
+        environment={ environment }
+        query={ appQuery }
+        variables={{}}
+        render={({ error, props }) => {
+          if (!props || error) {
+            return this.renderLoader(error);
+          }
+
+          return this.renderApplication(props);
+        }}
+      />
+    );
+  }
+
+  renderLoader(error = null) {
+    return (
+      <Row className="loader" type="flex" align="middle" justify="start">
+        <Col span={ 24 }>{ error || 'Loading' }</Col>
+      </Row>
+    );
+  }
+
+  renderApplication(props) {
     return (
       <Layout className="app">
         <Header className="app-header">
@@ -32,10 +56,7 @@ class App extends Component {
 
         <Layout>
           <Content className="app-content">
-            <Sessions sessions={ this.props.sessions } createSession={ this.props.createSession }></Sessions>
-            { activeSession &&
-              <Chat session={ activeSession }></Chat>
-            }
+            <Chat user={ props.user }></Chat>
           </Content>
         </Layout>
 

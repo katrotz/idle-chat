@@ -23,3 +23,5 @@ yarn-error.log*
 .idea
 
 packages/idle-chat-server/src/environments/local.js
+
+__generated__/

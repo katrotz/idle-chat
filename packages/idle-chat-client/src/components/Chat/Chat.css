@@ -2,6 +2,7 @@
   position: absolute;
   width: 350px;
   height: auto;
+  max-height: 80%;
   min-height: 400px;
   bottom: 0;
   right: 0;
@@ -23,9 +24,18 @@
   text-align: left;
   padding: 0 10px;
   margin: 10px 0;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+  contain: layout;
+  display: block;
 }
 
-.chat-message {}
+.chat-message {
+  margin-top: 3px;
+}
+
+.chat-message-avatar {}
 
 .chat-message-actions {
   opacity: 0;
